@@ -8,7 +8,8 @@ deployProperties = [:]
 
 pipeline {
     agent {
-        label 'kie-rhel7 && kie-mem16g && !built-in'
+        //label 'kie-rhel7 && kie-mem16g && !built-in'
+        label 'kie-rhel7-priority && !built-in'
     }
 
     tools {
@@ -52,10 +53,9 @@ pipeline {
                         assert getProjectVersion()
                         assert getDroolsVersion()
 
-                        if (isRelease()) {
-                            // Verify if on right release branch
-                            assert getBuildBranch() == util.getReleaseBranchFromVersion(getProjectVersion())
-                        }
+                        // if (isRelease()) {
+                            //assert getBuildBranch() == util.getReleaseBranchFromVersion(getProjectVersion())
+                        //}
                     }
 
                     dir(getRepoName()) {
@@ -130,7 +130,8 @@ pipeline {
             steps {
                 script {
                     // Deploy to specific repository with credentials
-                    maven.uploadLocalArtifacts(env.MAVEN_REPO_CREDS_ID, getLocalDeploymentFolder(), getMavenRepoZipUrl())
+                    // maven.uploadLocalArtifacts(env.MAVEN_REPO_CREDS_ID, getLocalDeploymentFolder(), getMavenRepoZipUrl())
+                    echo "maven.uploadLocalArtifacts(${env.MAVEN_REPO_CREDS_ID}, ${getLocalDeploymentFolder()}, ${getMavenRepoZipUrl()})"
                 }
             }
         }
@@ -140,8 +141,9 @@ pipeline {
             }
             steps {
                 script {
-                    // Stage release artifacts
-                    runMavenStage()
+                    //Stage release artifacts
+                    //runMavenStage()
+                    echo "stage artifacts to ${env.NEXUS_RELEASE_URL} with staging profile"
                 }
             }
         }
@@ -231,7 +233,8 @@ boolean shouldStageArtifacts() {
 }
 
 boolean shouldDeployToRepository() {
-    return env.MAVEN_DEPLOY_REPOSITORY && env.MAVEN_REPO_CREDS_ID && getGitAuthor() == 'kiegroup'
+    //return env.MAVEN_DEPLOY_REPOSITORY && env.MAVEN_REPO_CREDS_ID && getGitAuthor() == 'kiegroup'
+    return env.MAVEN_DEPLOY_REPOSITORY && env.MAVEN_REPO_CREDS_ID && getGitAuthor() == 'mbiarnes'
 }
 
 boolean isRelease() {
@@ -268,7 +271,7 @@ String getBotBranch() {
 }
 
 String getBotAuthor() {
-    return env.GIT_AUTHOR_BOT
+    return env.GIT_BOT_AUTHOR
 }
 
 String getBotAuthorCredsID() {
